@@ -8,20 +8,21 @@
 #include "packet.h"
 #include "export.h"
 
-namespace ce30_driver {
+namespace ce30_driver
+{
 
 class API ChannelTypeWidgets
 {
 public:
-  ChannelTypeWidgets(QWidget* parent);
-  ~ChannelTypeWidgets();
-  std::vector<QWidget*> GetAllWidgets();
-  bool IsChannelTypeChecked(const Channel& channel);
-  void Update();
+    ChannelTypeWidgets(QWidget* parent);
+    ~ChannelTypeWidgets();
+    std::vector<QWidget*> GetAllWidgets();
+    bool IsChannelTypeChecked(const Channel& channel);
+    void Update();
 private:
-  std::map<Channel::Type, QCheckBox*> check_boxes_;
-  QWidget* parent_;
-  std::set<Channel::Type> channel_type_checked_;
+    std::map<Channel::Type, QCheckBox*> check_boxes_;
+    QWidget* parent_;
+    std::set<Channel::Type> channel_type_checked_;
 };
 } // namespace ce30_driver
 
