@@ -18,8 +18,7 @@ using namespace std;
 
 namespace ce30_driver
 {
-Channel::Channel()
-    : distance(0.0f), amplitude(0.0f), amp_raw(0), grey_value(0)
+Channel::Channel() : distance(0.0f), amplitude(0.0f), amp_raw(0), grey_value(0)
 {
 
 }
@@ -362,8 +361,7 @@ std::unique_ptr<ParsedPacket> Packet::Parse()
     return packet;
 }
 
-float Packet::ParseAzimuth(
-    const unsigned char &high, const unsigned char &low)
+float Packet::ParseAzimuth(const unsigned char &high, const unsigned char &low)
 {
     int i = high;
     i = (i << 8);
@@ -371,21 +369,18 @@ float Packet::ParseAzimuth(
     return i / 100.0f;
 }
 
-float Packet::ParseDistance(
-    const unsigned char& high, const unsigned char& low)
+float Packet::ParseDistance(const unsigned char& high, const unsigned char& low)
 {
     int i = high;
     i = (i << 8);
     i |= low;
     double d = i * 2.0;
-    return
-        max(
-            Channel::DistanceMin(),
-            min(float(d / 1000.0), Channel::DistanceMax()));
+    return max(Channel::DistanceMin(),
+               min(float(d / 1000.0), Channel::DistanceMax()));
 }
 
-unsigned short Packet::ParseGreyValue(
-    const unsigned char &high, const unsigned char &low)
+unsigned short Packet::ParseGreyValue(const unsigned char &high,
+                                      const unsigned char &low)
 {
 //  unsigned char value_uc[2];
 //  value_uc[0] = high;
