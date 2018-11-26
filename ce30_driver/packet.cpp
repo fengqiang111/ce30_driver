@@ -52,6 +52,9 @@ int Channel::FullType()
         (int)Type::unknown;
 }
 
+/** 极坐标生成欧氏坐标
+  * x-投影距离
+  */
 Point Channel::point() const
 {
     return
