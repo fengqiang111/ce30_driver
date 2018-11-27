@@ -4,19 +4,28 @@
 using namespace std;
 using namespace ce30_driver;
 
-void DataReceiveCB(shared_ptr<PointCloud> cloud) {
-  for (Point& point : cloud->points) {
-    cout << point.x << " " << point.y << " " << point.z << endl;
-  }
+/**callback function
+  *@param cloud-一帧点云数据
+  *@return none
+  */
+void DataReceiveCB(shared_ptr<PointCloud> cloud)
+{
+    for (Point& point : cloud->points)
+    {
+        cout << point.x << " " << point.y << " " << point.z << endl;
+    }
 }
 
-int main() {
-  UDPServer server;
-  server.RegisterCallback(DataReceiveCB);
-  if (!server.Start()) {
-    return -1;
-  }
-  while (true) {
-    server.SpinOnce();
-  }
+int main()
+{
+    UDPServer server;
+    server.RegisterCallback(DataReceiveCB);
+    if (!server.Start())
+    {
+        return -1;
+    }
+    while (true)
+    {
+        server.SpinOnce();
+    }
 }

@@ -14,20 +14,34 @@ using namespace boost::asio::ip;
 
 namespace ce30_driver
 {
-UDPSocket::UDPSocket(const std::string& ip, uint16_t port)
-    : ip_(ip), port_(port)
+/** UDPSocket constructor
+  *@param ip: ip_ = ip
+  *@param port: port_ = port
+  *@return none
+  */
+UDPSocket::UDPSocket(const std::string& ip, uint16_t port) : ip_(ip), port_(port)
 {
 }
 
+/** UDPSocket destructor
+  *@param none
+  *@return none
+  */
 UDPSocket::~UDPSocket()
 {
 }
 
+/** UDPSocket Connection
+  *@param none
+  *@return Diagnose::connect_successful
+  *        Diagnose::connect_failed
+  */
 Diagnose UDPSocket::Connect()
 {
     try
     {
-        timed_socket_.reset(new TimedUDPSocket(udp::endpoint(address::from_string(ip_), port_)));
+        timed_socket_.reset(new TimedUDPSocket(udp::endpoint(address::from_string(ip_),
+                                                             port_)));
     }
     catch (const std::exception& e)
     {
@@ -37,6 +51,10 @@ Diagnose UDPSocket::Connect()
     return Diagnose::connect_successful;
 }
 
+/**接收数据
+  *@param
+  *@return
+  */
 Diagnose UDPSocket::GetPacket(PacketBase &pkt, const double time_offset)
 {
     if (!timed_socket_)
@@ -44,10 +62,9 @@ Diagnose UDPSocket::GetPacket(PacketBase &pkt, const double time_offset)
         return Diagnose::no_prior_connection;
     }
     boost::system::error_code ec;
-    auto size_received =
-        timed_socket_->Receive(
-            boost::asio::buffer(&pkt.data[0], pkt.data.size()),
-            boost::posix_time::seconds(1), ec);
+    auto size_received = timed_socket_->Receive(
+                                boost::asio::buffer(&pkt.data[0], pkt.data.size()),
+                                boost::posix_time::seconds(1), ec);
     if (size_received != pkt.data.size())
     {
         return Diagnose::unexcepted_packet_size;
@@ -60,14 +77,22 @@ Diagnose UDPSocket::GetPacket(PacketBase &pkt, const double time_offset)
     return Diagnose::receive_successful;
 }
 
+/**
+  *@param
+  *@return
+  */
 Diagnose UDPSocket::SendPacket(const PacketBase& packet)
 {
     timed_socket_->GetSocket().send_to(
-        boost::asio::buffer(&packet.data[0], packet.data.size()),
-        timed_socket_->GetEndpoint());
+            boost::asio::buffer(&packet.data[0], packet.data.size()),
+            timed_socket_->GetEndpoint());
     return Diagnose::send_successful;
 }
 
+/**
+  *@param
+  *@return
+  */
 Diagnose UDPSocket::SendPacketThreadSafe(const PacketBase &packet)
 {
     io_mutex_.lock();
@@ -76,8 +101,11 @@ Diagnose UDPSocket::SendPacketThreadSafe(const PacketBase &packet)
     return diagnose;
 }
 
-Diagnose UDPSocket::GetPacketThreadSafe(
-    PacketBase &pkt, const double time_offset)
+/**
+  *@param
+  *@return
+  */
+Diagnose UDPSocket::GetPacketThreadSafe(PacketBase &pkt, const double time_offset)
 {
     io_mutex_.lock();
     auto diagnose = GetPacket(pkt, time_offset);

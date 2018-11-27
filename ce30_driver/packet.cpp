@@ -219,6 +219,11 @@ float Scan::LookUpVerticalAzimuth(const int& i)
 
 PacketBase::~PacketBase() {}
 
+/**接收到的数据包
+  *HeaderBytes(42byte) + 12列 * (ColumnIdentifierBytes(2byte)+AzimuthBytes(2byte) +
+  *                              20(pixel) * (distance(2byte) + amp(1byte)) ) +
+  *TimeStampBytes(4byte) + FactoryBytes(2byte)
+  */
 Packet::Packet()
 {
     data.resize(
@@ -307,13 +312,18 @@ bool Packet::IsGreyImage(const char &grey_image_byte)
     return grey_image_byte & 0x02;
 }
 
+/**解析Packet，20*12列数据放到ParsedPacket里面，并返回ParsedPacket的指针
+  *@param none
+  *@return null_packet(类型std::unique_ptr<ParsedPacket>)空指针-Packet数据解析错误
+  *@       parsed_packet(类型std::unique_ptr<ParsedPacket>)
+  */
 std::unique_ptr<ParsedPacket> Packet::Parse()
 {
     std::unique_ptr<ParsedPacket> null_packet;
-    std::unique_ptr<ParsedPacket> packet(new ParsedPacket);
-    packet->grey_image = IsGreyImage(data[GreyImageStatusIndex()]);
+    std::unique_ptr<ParsedPacket> parsed_packet(new ParsedPacket);
+    parsed_packet->grey_image = IsGreyImage(data[GreyImageStatusIndex()]);
     int index = HeaderBytes();
-    for (auto& col : packet->columns)
+    for (auto& col : parsed_packet->columns)
     {
         if (data[index++] != ColumnIdentifierHigh())
         {
@@ -335,7 +345,7 @@ std::unique_ptr<ParsedPacket> Packet::Parse()
 
 //      cout << hex << (short)dist_low << " " << (short)dist_high << endl;
 
-            if (packet->grey_image)
+            if (parsed_packet->grey_image)
             {
                 chn.grey_value = ParseGreyValue(dist_high, dist_low);
             }
@@ -360,8 +370,8 @@ std::unique_ptr<ParsedPacket> Packet::Parse()
         i = data[index++];
     }
     std::reverse(stamp_raw.begin(), stamp_raw.end());
-    packet->time_stamp = ParseTimeStamp(stamp_raw);
-    return packet;
+    parsed_packet->time_stamp = ParseTimeStamp(stamp_raw);
+    return parsed_packet;
 }
 
 float Packet::ParseAzimuth(const unsigned char &high, const unsigned char &low)

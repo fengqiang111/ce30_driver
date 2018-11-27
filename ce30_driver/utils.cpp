@@ -12,6 +12,11 @@ using namespace std;
 
 namespace ce30_driver
 {
+/**获取版本号
+  *@param version-输出版本号
+  *@param socket
+  *@return true or false
+  */
 bool GetVersion(std::string& version, UDPSocket& socket)
 {
     VersionRequestPacket version_request;
@@ -93,6 +98,10 @@ bool SetDeviceID(const int& id, UDPSocket& socket)
     return false;
 }
 
+/**发送启动测试指令
+  *@param socket
+  *@return true-success false-fail
+  */
 bool StartRunning(UDPSocket& socket)
 {
     StartRequestPacket start_request;
@@ -108,6 +117,10 @@ bool StartRunning(UDPSocket& socket)
     return false;
 }
 
+/**停止测试
+  *@param socket
+  *@return true or false
+  */
 bool StopRunning(UDPSocket& socket)
 {
     StopRequestPacket stop_request;
@@ -328,8 +341,13 @@ bool Connect(UDPSocket& socket)
     return socket.Connect() == Diagnose::connect_successful;
 }
 
-bool GetPacket(
-    PacketBase& packet, UDPSocket& socket, const bool& thread_safe)
+/**UDP socket接收数据
+  *@param packet
+  *@socket
+  *@thread_safe
+  *@return
+  */
+bool GetPacket(PacketBase& packet, UDPSocket& socket, const bool& thread_safe)
 {
     Diagnose diagnose;
     if (thread_safe)
@@ -343,8 +361,13 @@ bool GetPacket(
     return diagnose == Diagnose::receive_successful;
 }
 
-bool SendPacket(
-    const PacketBase &packet, UDPSocket &socket, const bool &thread_safe)
+/**UDP socket发送数据
+  *@param packet
+  *@socket
+  *@thread_safe
+  *@return
+  */
+bool SendPacket(const PacketBase &packet, UDPSocket &socket, const bool &thread_safe)
 {
     Diagnose diagnose;
     if (thread_safe)
