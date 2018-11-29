@@ -67,6 +67,7 @@ int main()
         return -1;
     }
 
+    // get CE30-D version
     VersionRequestPacket version_request;
     if (!SendPacket(version_request, socket))
     {
@@ -81,6 +82,7 @@ int main()
 
     cout << "CE30-D version: " << version_response.GetVersionString() << endl;
 
+    // start get distance frame
     StartRequestPacket start_request;
     if (!SendPacket(start_request, socket))
     {
@@ -94,6 +96,8 @@ int main()
         {
             continue;
         }
+
+        // parse packet
         unique_ptr<ParsedPacket> parsed = packet.Parse();
         if (parsed)
         {
@@ -107,6 +111,7 @@ int main()
                     }
                     else
                     {
+                        // convert channel to Point type
                         Point p = channel.point();
                         if (sqrt(p.x * p.x + p.y * p.y) < 0.1f)
                         {
@@ -116,6 +121,8 @@ int main()
                     }
                 }
             }
+
+            // feed point cloud to cluster
             cluster_mgr.DBSCAN_kdtree_2steps(0.05, 40, 0.30, 20, point_cloud, labels);
             for (i = 0; i < labels.size(); ++i)
             {

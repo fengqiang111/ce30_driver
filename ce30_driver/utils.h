@@ -101,8 +101,7 @@ class API DeviceConfig
 {
 public:
     static bool Configure(UDPSocket &socket);
-    static bool Configure(
-        UDPSocket& socket, const QString& ini_file);
+    static bool Configure(UDPSocket& socket, const QString& ini_file);
 private:
     static QString kSafetyModeKey;
 };
