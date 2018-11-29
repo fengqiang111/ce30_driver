@@ -30,6 +30,11 @@ foreach(p LIB BIN INCLUDE CMAKE)
   endif()
 endforeach()
 
+find_package(PCL 1.7 REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 # set up include-directories
 include_directories(
   "${PROJECT_SOURCE_DIR}"   # to find ce30_driver/ce30_driver.h
