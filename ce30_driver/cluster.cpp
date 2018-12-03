@@ -30,6 +30,7 @@ cluster::~cluster()
 }
 
 /**两步聚类
+  *@param mode:CLUSTER_KD_TREE or CLUSTER_OC_TREE
   *@param eps_near: 近距离的eps
   *@param min_sample_size_near: 近处聚类最小点数量
   *@param eps_far: 远距离的eps
@@ -38,10 +39,10 @@ cluster::~cluster()
   *@param label:输出点云分类标签
   *@return true-success false-fail
   */
-bool cluster::DBSCAN_kdtree_2steps(float eps_near, int min_sample_size_near,
-                                   float eps_far, int min_sample_size_far,
-                                   ce30_driver::PointCloud &cloud,
-                                   vector<int> &label)
+bool cluster::DBSCAN_2steps(cluster_mode mode, float eps_near, int min_sample_size_near,
+                            float eps_far, int min_sample_size_far,
+                            ce30_driver::PointCloud &cloud,
+                            vector<int> &label)
 {
     float boundary = DBSCAN_2steps_boundary();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_near(new pcl::PointCloud<pcl::PointXYZ>);
@@ -77,7 +78,15 @@ bool cluster::DBSCAN_kdtree_2steps(float eps_near, int min_sample_size_near,
     label.clear();
     if (n_points_near != 0)
     {
-        DBSCAN(cloud_near, cluster_indices_near, eps_near, min_sample_size_near);
+        if (mode == CLUSTER_KD_TREE)
+        {
+            DBSCAN_kdtree(cloud_near, cluster_indices_near, eps_near, min_sample_size_near);
+        }
+        else
+        {
+            DBSCAN_octree(cloud_near, cluster_indices_near, eps_near, min_sample_size_near);
+        }
+
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_near.begin();
              it != cluster_indices_near.end(); ++it)
         {
@@ -95,7 +104,15 @@ bool cluster::DBSCAN_kdtree_2steps(float eps_near, int min_sample_size_near,
 
     if (n_points_far != 0)
     {
-        DBSCAN(cloud_far, cluster_indices_far, eps_far, min_sample_size_far);
+        if (mode == CLUSTER_KD_TREE)
+        {
+            DBSCAN_kdtree(cloud_far, cluster_indices_far, eps_far, min_sample_size_far);
+        }
+        else
+        {
+            DBSCAN_octree(cloud_far, cluster_indices_far, eps_far, min_sample_size_far);
+        }
+
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices_far.begin();
              it != cluster_indices_far.end(); ++it)
         {
@@ -116,23 +133,52 @@ bool cluster::DBSCAN_kdtree_2steps(float eps_near, int min_sample_size_near,
 }
 
 
-/**DBSCAN点云聚类，使用欧氏距离提取点云
+/**DBSCAN kdtree点云聚类，使用欧氏距离提取点云
   *@param cloud: 输入一帧点云数据，类型pcl::PointCloud<pcl::PointXYZ>::Ptr
   *@param cluster_indices: 输出聚类结果，类型std::vector<pcl::PointIndices>
   *@param eps: 搜索半径
   *@param min_sample_size: 分类点云最小数量
   *@return none
   */
-void cluster::DBSCAN(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-                     std::vector<pcl::PointIndices>& cluster_indices,
-                     float eps, int min_samples_size)
+void cluster::DBSCAN_kdtree(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+                            std::vector<pcl::PointIndices>& cluster_indices,
+                            float eps, int min_samples_size)
 {
     if (cloud->empty() || eps <= 0 || min_samples_size <= 0)
     {
         return;
     }
     // Creating the KdTree object for the search method of the extraction
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud (cloud);
+
+    //std::vector<pcl::PointIndices> cluster_indices;
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance (eps);
+    ec.setMinClusterSize (min_samples_size);
+    ec.setMaxClusterSize (6400);
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (cloud);
+    ec.extract (cluster_indices);
+}
+
+/**DBSCAN octree点云聚类，使用欧氏距离提取点云
+  *@param cloud: 输入一帧点云数据，类型pcl::PointCloud<pcl::PointXYZ>::Ptr
+  *@param cluster_indices: 输出聚类结果，类型std::vector<pcl::PointIndices>
+  *@param eps: 搜索半径
+  *@param min_sample_size: 分类点云最小数量
+  *@return none
+  */
+void cluster::DBSCAN_octree(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+                            std::vector<pcl::PointIndices>& cluster_indices,
+                            float eps, int min_samples_size)
+{
+    if (cloud->empty() || eps <= 0 || min_samples_size <= 0)
+    {
+        return;
+    }
+
+    pcl::search::Octree<pcl::PointXYZ>::Ptr tree(new pcl::search::Octree<pcl::PointXYZ>(eps));
     tree->setInputCloud (cloud);
 
     //std::vector<pcl::PointIndices> cluster_indices;

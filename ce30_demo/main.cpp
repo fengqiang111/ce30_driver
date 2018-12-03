@@ -3,7 +3,7 @@
 
 using namespace std;
 using namespace ce30_driver;
-
+#if 0
 /**callback function
   *@param cloud-一帧点云数据
   *@return none
@@ -28,7 +28,7 @@ void cluster_callback(shared_ptr<PointCloud> cloud)
     cluster cluster_mgr;
 
     point_cloud.points = cloud->points;
-    cluster_mgr.DBSCAN_kdtree_2steps(0.05, 40, 0.30, 20, point_cloud, labels);
+    cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
 
 
     for (i = 0; i < labels.size(); ++i)
@@ -39,7 +39,7 @@ void cluster_callback(shared_ptr<PointCloud> cloud)
                                 " labels = " << labels[i] << endl;
     }
 }
-#if 0
+
 int main()
 {
     UDPServer server;
@@ -123,7 +123,7 @@ int main()
             }
 
             // feed point cloud to cluster
-            cluster_mgr.DBSCAN_kdtree_2steps(0.05, 40, 0.30, 20, point_cloud, labels);
+            cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
             for (i = 0; i < labels.size(); ++i)
             {
                 cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<

@@ -15,19 +15,28 @@ using namespace std;
 
 namespace ce30_driver
 {
+enum cluster_mode
+{
+    CLUSTER_KD_TREE,
+    CLUSTER_OC_TREE
+};
+
 class API cluster
 {
     public:
         cluster();
         ~cluster();
-        bool DBSCAN_kdtree_2steps(float eps_near, int min_sample_size_near,
-                                  float eps_far, int min_sample_size_far,
-                                  ce30_driver::PointCloud &cloud,
-                                  vector<int> &label);
+        bool DBSCAN_2steps(cluster_mode mode, float eps_near, int min_sample_size_near,
+                           float eps_far, int min_sample_size_far,
+                           ce30_driver::PointCloud &cloud,
+                           vector<int> &label);
     private:
-        void DBSCAN(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-                    std::vector<pcl::PointIndices>& cluster_indices,
-                    float eps, int min_samples_size);
+        void DBSCAN_kdtree(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+                           std::vector<pcl::PointIndices>& cluster_indices,
+                           float eps, int min_samples_size);
+        void DBSCAN_octree(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+                           std::vector<pcl::PointIndices>& cluster_indices,
+                           float eps, int min_samples_size);
         float DBSCAN_2steps_boundary(void);
 };
 
