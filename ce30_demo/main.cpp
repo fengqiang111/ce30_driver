@@ -105,20 +105,13 @@ int main()
             {
                 for (Channel& channel : column.channels)
                 {
-                    if (channel.type() != Channel::Type::normal)
+                    // convert channel to Point type
+                    Point p = channel.point();
+                    if (sqrt(p.x * p.x + p.y * p.y) < 0.1f)
                     {
                         continue;
                     }
-                    else
-                    {
-                        // convert channel to Point type
-                        Point p = channel.point();
-                        if (sqrt(p.x * p.x + p.y * p.y) < 0.1f)
-                        {
-                            continue;
-                        }
-                        point_cloud.points.push_back(p);
-                    }
+                    point_cloud.points.push_back(p);
                 }
             }
 
