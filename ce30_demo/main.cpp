@@ -61,6 +61,8 @@ int main()
     PointCloud point_cloud;
     cluster cluster_mgr;
     vector<int> labels;
+    Scan distance_scan;
+    Scan gray_scan;
 
     if (!Connect(socket))
     {
@@ -92,49 +94,67 @@ int main()
     Packet packet;
     while (true)
     {
-        if (!GetPacket(packet, socket))
+        labels.clear();
+        point_cloud.points.clear();
+        gray_scan.Reset();
+        distance_scan.Reset();
+        while (!distance_scan.Ready() && !gray_scan.Ready())
         {
-            continue;
+            if (!GetPacket(packet, socket))
+            {
+                continue;
+            }
+            // parse packet
+            unique_ptr<ParsedPacket> parsed = packet.Parse();
+            if (parsed)
+            {
+                if (parsed->grey_image)
+                {
+                    gray_scan.AddColumnsFromPacket(*parsed);
+                }
+                else
+                {
+                    distance_scan.AddColumnsFromPacket(*parsed);
+                }
+            }
         }
 
-        // parse packet
-        unique_ptr<ParsedPacket> parsed = packet.Parse();
-        if (parsed)
+        if (distance_scan.Ready())
         {
-            for (Column& column : parsed->columns)
+            for (int x = 0; x < distance_scan.Width(); ++x)
             {
-                for (Channel& channel : column.channels)
+                for (int y = 0; y < distance_scan.Height(); ++y)
                 {
+                    auto channel = distance_scan.at(x, y);
                     if (channel.type() != Channel::Type::normal)
                     {
                         continue;
                     }
-                    else
+                    Point p = channel.point();
+                    if (sqrt(p.x * p.x + p.y * p.y) < 0.1f)
                     {
-                        // convert channel to Point type
-                        Point p = channel.point();
-                        if (sqrt(p.x * p.x + p.y * p.y) < 0.1f)
-                        {
-                            continue;
-                        }
-                        point_cloud.points.push_back(p);
+                        continue;
                     }
+                    point_cloud.points.push_back(p);
                 }
             }
 
             // feed point cloud to cluster
+            cout << "be point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
             cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
-            for (i = 0; i < labels.size(); ++i)
-            {
-                cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<
-                                        point_cloud.points[i].y << " " <<
-                                        point_cloud.points[i].z <<
-                                        " labels = " << labels[i] << endl;
-            }
+            cout << "af point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
+    //      for (i = 0; i < labels.size(); ++i)
+    //      {
+    //            cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<
+    //                                    point_cloud.points[i].y << " " <<
+    //                                    point_cloud.points[i].z <<
+    //                                    " labels = " << labels[i] << endl;
+    //       }
+
+
+
         }
-
     }
-
 }
 
 #endif
