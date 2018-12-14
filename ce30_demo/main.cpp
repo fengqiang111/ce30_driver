@@ -1,9 +1,10 @@
 #include <iostream>
+#include <map>
 #include <ce30_driver/ce30_driver.h>
 
 using namespace std;
 using namespace ce30_driver;
-#if 0
+#if 1
 /**callback function
   *@param cloud-一帧点云数据
   *@return none
@@ -23,20 +24,34 @@ void DataReceiveCB(shared_ptr<PointCloud> cloud)
 void cluster_callback(shared_ptr<PointCloud> cloud)
 {
     int i;
+    map<int, float> map_labels_score;
+    map<int, int> map_labels_num;
     vector<int> labels;
     PointCloud point_cloud;
     cluster cluster_mgr;
+    float distance;
 
     point_cloud.points = cloud->points;
     cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
 
-
-    for (i = 0; i < labels.size(); ++i)
+    // 统计label下点的距离和以及个数
+    for (i = 0; i < point_cloud.points.size(); ++i)
     {
-        cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<
-                                point_cloud.points[i].y << " " <<
-                                point_cloud.points[i].z <<
-                                " labels = " << labels[i] << endl;
+        map_labels_score[labels[i]] += point_cloud.points[i].z;
+        map_labels_num[labels[i]] += 1;
+    }
+
+    // 输出label的均值距离
+    for (i = 0; i < map_labels_score.size(); ++i)
+    {
+        distance = map_labels_score[i] / map_labels_num[i];
+        if (distance < 0.53)
+        {
+            cout << "****************************" << endl;
+            cout << "labels = " << i << " , distance = " << distance
+                 << endl;
+            cout << "****************************" << endl << endl;
+        }
     }
 }
 
