@@ -197,6 +197,6 @@ void cluster::DBSCAN_octree(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
   */
 float cluster::DBSCAN_2steps_boundary(void)
 {
-    return 5.0;
+    return 0.6;
 }
 }

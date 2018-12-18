@@ -145,7 +145,7 @@ void UDPServer::SpinOnce(const int& millisec)
             for (int y = 0; y < scan.Height(); ++y)
             {
                 Point p = scan.at(x, y).point();
-                if (sqrt(p.x * p.x + p.y * p.y) < 0.01f)
+                if (sqrt(p.x * p.x + p.y * p.y) < 0.30f)
                 {
                     continue;
                 }

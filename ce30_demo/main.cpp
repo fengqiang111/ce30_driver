@@ -17,42 +17,137 @@ void DataReceiveCB(shared_ptr<PointCloud> cloud)
     }
 }
 
+/**获取一个cluster中的中值数据
+  *@param point_cloud-一帧点云数据
+  *@param labels
+  *@param min_distance
+  *@return none
+  */
+bool get_max_distance(PointCloud &point_cloud, vector<int> &labels,
+                      vector<float> &min_distances)
+{
+    int i;
+    int label;
+    float distance;
+
+    map<int, float> map_labels_max_distance;
+    map<int, float> map_labels_min_distance;
+
+    map_labels_max_distance.clear();
+    map_labels_min_distance.clear();
+
+    for (i = 0; i < point_cloud.points.size(); ++i)
+    {
+        label = labels[i];
+        distance = point_cloud.points[i].x;
+
+        if (map_labels_max_distance.count(label))
+        {
+            if (distance > map_labels_max_distance[label])
+            {
+                map_labels_max_distance[label] = distance;
+            }
+        }
+        else
+        {
+            map_labels_max_distance[label] = distance;
+        }
+
+
+        if (map_labels_min_distance.count(label))
+        {
+            if (distance < map_labels_min_distance[label])
+            {
+                map_labels_min_distance[label] = distance;
+            }
+        }
+        else
+        {
+            map_labels_min_distance[label] = distance;
+        }
+    }
+
+    for (i = 0; i < map_labels_max_distance.size(); ++i)
+    {
+        float max_distance;
+        float min_distance;
+        max_distance = map_labels_max_distance[i];
+        min_distance = map_labels_min_distance[i];
+        distance = min_distance + (max_distance - min_distance) * 0.75;
+        if (distance < 0.54)
+        {
+            min_distances.push_back(distance);
+        }
+    }
+
+    return true;
+}
+
+/**获取一个cluster中的均值数据
+  *@param point_cloud-一帧点云数据
+  *@param labels
+  *@param min_distance
+  *@return none
+  */
+bool get_average_distance(PointCloud &point_cloud, vector<int> &labels,
+                          vector<float> &min_distances)
+{
+    int i;
+    float distance;
+
+    map<int, float> map_labels_sum;
+    map<int, int> map_labels_num;
+
+    map_labels_num.clear();
+    map_labels_sum.clear();
+
+    // 统计label下点的距离和以及个数
+    for (i = 0; i < point_cloud.points.size(); ++i)
+    {
+        map_labels_sum[labels[i]] += point_cloud.points[i].x;
+        map_labels_num[labels[i]] += 1;
+
+    }
+
+    // 输出label的均值距离
+    for (i = 0; i < map_labels_sum.size(); ++i)
+    {
+        distance = map_labels_sum[i] / map_labels_num[i];
+        if (distance < 0.54)
+        {
+            min_distances.push_back(distance);
+        }
+    }
+
+    return true;
+}
+
 /**cluster callback function
   *@param cloud-一帧点云数据
   *@return none
   */
 void cluster_callback(shared_ptr<PointCloud> cloud)
 {
-    int i;
-    map<int, float> map_labels_score;
-    map<int, int> map_labels_num;
     vector<int> labels;
+    vector<float> min_distances;
     PointCloud point_cloud;
     cluster cluster_mgr;
-    float distance;
+    static int count = 0;
 
+    point_cloud.points.clear();
     point_cloud.points = cloud->points;
-    cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
+    cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.01375, 30, 0.055, 30, point_cloud, labels);
 
-    // 统计label下点的距离和以及个数
-    for (i = 0; i < point_cloud.points.size(); ++i)
-    {
-        map_labels_score[labels[i]] += point_cloud.points[i].z;
-        map_labels_num[labels[i]] += 1;
-    }
+    get_average_distance(point_cloud, labels, min_distances);
 
-    // 输出label的均值距离
-    for (i = 0; i < map_labels_score.size(); ++i)
+    cout << "***********************" << endl;
+    for (vector<float>::iterator it = min_distances.begin(); it < min_distances.end(); it++)
     {
-        distance = map_labels_score[i] / map_labels_num[i];
-        if (distance < 0.53)
-        {
-            cout << "****************************" << endl;
-            cout << "labels = " << i << " , distance = " << distance
-                 << endl;
-            cout << "****************************" << endl << endl;
-        }
+        cout << count << " = " << *it << endl;
     }
+    cout << "***********************" << endl << endl;
+
+
 }
 
 int main()
