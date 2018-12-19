@@ -1,10 +1,48 @@
 #include <iostream>
 #include <map>
 #include <ce30_driver/ce30_driver.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
 
 using namespace std;
 using namespace ce30_driver;
 #if 1
+
+UDPServer server;
+
+bool ctrlhandler(DWORD fdwctrltype)
+{
+    switch (fdwctrltype)
+    {
+        // handle the ctrl-c signal.
+        case CTRL_C_EVENT:
+            server.~UDPServer();
+            printf("ctrl-c event\n\n");
+            return(false);
+        // ctrl-close: confirm that the user wants to exit.
+        case CTRL_CLOSE_EVENT:
+            server.~UDPServer();
+            printf("ctrl-close event\n\n");
+            return(true);
+        //  // pass other signals to the next handler.
+        case CTRL_BREAK_EVENT:
+            server.~UDPServer();
+            printf("ctrl-break event\n\n");
+            return false;
+        case CTRL_LOGOFF_EVENT:
+            server.~UDPServer();
+            printf("ctrl-logoff event\n\n");
+            return false;
+        case CTRL_SHUTDOWN_EVENT:
+            server.~UDPServer();
+            printf("ctrl-shutdown event\n\n");
+            return false;
+        default:
+            return false;
+    }
+}
+
 /**callback function
   *@param cloud-一帧点云数据
   *@return none
@@ -17,14 +55,15 @@ void DataReceiveCB(shared_ptr<PointCloud> cloud)
     }
 }
 
-/**获取一个cluster中的中值数据
+/**获取clusters中的distance = min_distance + (max_distance - min_distance) * 0.75
+  * 返回distance < 0.54的距离数据到vector中
   *@param point_cloud-一帧点云数据
-  *@param labels
-  *@param min_distance
-  *@return none
+  *@param labels-每个point中的label
+  *@param min_distance-返回distance < 0.54的distance数据
+  *@return false-参数错误  true-成功
   */
-bool get_max_distance(PointCloud &point_cloud, vector<int> &labels,
-                      vector<float> &min_distances)
+bool get_max_and_min_distance(PointCloud &point_cloud, vector<int> &labels,
+                              vector<float> &min_distances)
 {
     int i;
     int label;
@@ -35,6 +74,12 @@ bool get_max_distance(PointCloud &point_cloud, vector<int> &labels,
 
     map_labels_max_distance.clear();
     map_labels_min_distance.clear();
+
+    if ((point_cloud.points.size() == 0 || labels.size() == 0) ||
+        (point_cloud.points.size() != labels.size()))
+    {
+        return false;
+    }
 
     for (i = 0; i < point_cloud.points.size(); ++i)
     {
@@ -83,11 +128,12 @@ bool get_max_distance(PointCloud &point_cloud, vector<int> &labels,
     return true;
 }
 
-/**获取一个cluster中的均值数据
+/**获取clusters中的distance = cluster average distance
+  * 返回distance < 0.54的距离数据到vector中
   *@param point_cloud-一帧点云数据
-  *@param labels
-  *@param min_distance
-  *@return none
+  *@param labels-每个point中的label
+  *@param min_distance-返回distance < 0.54的distance数据
+  *@return false-参数错误  true-成功
   */
 bool get_average_distance(PointCloud &point_cloud, vector<int> &labels,
                           vector<float> &min_distances)
@@ -100,6 +146,12 @@ bool get_average_distance(PointCloud &point_cloud, vector<int> &labels,
 
     map_labels_num.clear();
     map_labels_sum.clear();
+
+    if ((point_cloud.points.size() == 0 || labels.size() == 0) ||
+        (point_cloud.points.size() != labels.size()))
+    {
+        return false;
+    }
 
     // 统计label下点的距离和以及个数
     for (i = 0; i < point_cloud.points.size(); ++i)
@@ -137,23 +189,26 @@ void cluster_callback(shared_ptr<PointCloud> cloud)
     point_cloud.points.clear();
     point_cloud.points = cloud->points;
     cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.01375, 30, 0.055, 30, point_cloud, labels);
+//    cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.01375, 20, 0.055, 30, point_cloud, labels);
 
     get_average_distance(point_cloud, labels, min_distances);
-
-    cout << "***********************" << endl;
-    for (vector<float>::iterator it = min_distances.begin(); it < min_distances.end(); it++)
+//    get_max_and_min_distance(point_cloud, labels, min_distances);
+    if (min_distances.size())
     {
-        cout << count << " = " << *it << endl;
+        cout << "***********************" << endl;
+        for (vector<float>::iterator it = min_distances.begin(); it < min_distances.end(); it++)
+        {
+            cout << count++ << " = " << *it << endl;
+        }
+        cout << "***********************" << endl << endl;
     }
-    cout << "***********************" << endl << endl;
-
-
 }
 
 int main()
 {
-    UDPServer server;
+
     server.RegisterCallback(cluster_callback);
+    SetConsoleCtrlHandler((PHANDLER_ROUTINE)ctrlhandler, true);
     if (!server.Start())
     {
         return -1;

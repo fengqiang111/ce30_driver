@@ -49,8 +49,7 @@ public:
      * @brief register measurement data receiver function
      * @param callback the receiver function
      */
-    void RegisterCallback(
-        std::function<void(std::shared_ptr<PointCloud>)> callback);
+    void RegisterCallback(std::function<void(std::shared_ptr<PointCloud>)> callback);
     /**
      * @brief spin server once
      * @param millisec blocking time in milliseconds
