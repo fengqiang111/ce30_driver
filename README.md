@@ -17,9 +17,9 @@ As `ce30_driver` is an open-source project, we are calling for contributions. Pl
 - [Official Website](http://www.benewake.com/en/index.html)
 - [Tutorial](tutorials/write_a_simple_server.md)
 - [API Documentation](api_doc/html/index.html)
-- [ce30_viz](https://codincodee.github.io/ce30_viz)
-- [ce30_driver_ros](https://codincodee.github.io/ce30_driver_ros/)
+- [ce30_viz](https://github.com/fengqiang111/ce30_viz/tree/develop)
+- [ce30_driver_ros](https://github.com/fengqiang111/ce30_driver_ros/tree/develop/)
 
 #### Version
 
-- v1.3.0
+- v2.0.0
