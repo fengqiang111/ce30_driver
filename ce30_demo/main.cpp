@@ -59,8 +59,8 @@ int main()
     int i;
     UDPSocket socket;
     PointCloud point_cloud;
-    cluster cluster_mgr;
-    vector<int> labels;
+    //cluster cluster_mgr;
+    //vector<int> labels;
     Scan distance_scan;
     Scan gray_scan;
 
@@ -94,7 +94,7 @@ int main()
     Packet packet;
     while (true)
     {
-        labels.clear();
+        //labels.clear();
         point_cloud.points.clear();
         gray_scan.Reset();
         distance_scan.Reset();
@@ -136,16 +136,16 @@ int main()
             }
 
             // feed point cloud to cluster
-            cout << "be point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
-            cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
-            cout << "af point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
-    //      for (i = 0; i < labels.size(); ++i)
-    //      {
-    //            cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<
-    //                                    point_cloud.points[i].y << " " <<
-    //                                    point_cloud.points[i].z <<
-    //                                    " labels = " << labels[i] << endl;
-    //       }
+//            cout << "be point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
+//            cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
+//            cout << "af point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
+          cout << point_cloud.points.size() << endl;
+          for (i = 0; i < point_cloud.points.size(); ++i)
+          {
+                cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<
+                                        point_cloud.points[i].y << " " <<
+                                        point_cloud.points[i].z << endl;
+          }
 
 
 

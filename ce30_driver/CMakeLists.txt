@@ -39,8 +39,8 @@ endif()
 add_library(
   ce30_driver
     SHARED
-      cluster.h
-      cluster.cpp
+      #cluster.h
+      #cluster.cpp
       utils.h
       utils.cpp
       config.h.in
@@ -63,13 +63,13 @@ add_library(
 target_link_libraries(
   ce30_driver
     ${Boost_LIBRARIES}
-    ${PCL_LIBRARIES}
+    #${PCL_LIBRARIES}
     ${QT5_LINK}
 )
 
 set(
   PUBLIC_HEADERS
-    cluster.h
+    #cluster.h
     utils.h
     udp_socket.h
     packet.h

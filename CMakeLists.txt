@@ -4,7 +4,7 @@ project(ce30_driver C CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 set(CE30_DRIVER_MAJOR_VERSION 2)
-set(CE30_DRIVER_MINOR_VERSION 0)
+set(CE30_DRIVER_MINOR_VERSION 1)
 set(CE30_DRIVER_PATCH_VERSION 0)
 set(CE30_DRIVER_VERSION
   ${CE30_DRIVER_MAJOR_VERSION}.${CE30_DRIVER_MINOR_VERSION}.${CE30_DRIVER_PATCH_VERSION})
@@ -30,10 +30,10 @@ foreach(p LIB BIN INCLUDE CMAKE)
   endif()
 endforeach()
 
-find_package(PCL 1.7 REQUIRED)
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+#find_package(PCL 1.7 REQUIRED)
+#include_directories(${PCL_INCLUDE_DIRS})
+#link_directories(${PCL_LIBRARY_DIRS})
+#add_definitions(${PCL_DEFINITIONS})
 
 # set up include-directories
 include_directories(
