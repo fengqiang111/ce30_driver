@@ -1,5 +1,7 @@
 #include <iostream>
 #include <ce30_driver/ce30_driver.h>
+#include <math.h>
+#include <vector>
 
 using namespace std;
 using namespace ce30_driver;
@@ -48,7 +50,7 @@ int main()
     {
         return -1;
     }
-    while (true)
+    while (true)d<
     {
         server.SpinOnce();
     }
@@ -84,12 +86,35 @@ int main()
 
     cout << "CE30-D version: " << version_response.GetVersionString() << endl;
 
+	GetIDRequestPacket ID_request;
+
+    if (!SendPacket(ID_request, socket))
+    {
+        return -1;
+    }
+
+    GetIDResponsePacket ID_response;
+    if (!GetPacket(ID_response, socket))
+    {
+        return -1;
+    }
+    std::vector<unsigned char> id = ID_response.ID();
+    
+    cout << "id: ";
+    for (auto i = 0; i < id.size(); ++i)
+    {
+        cout << id[i];
+    }
+ 
+    cout << "\n";
+
     // start get distance frame
     StartRequestPacket start_request;
     if (!SendPacket(start_request, socket))
     {
         return -1;
     }
+     
 
     Packet packet;
     while (true)
@@ -104,7 +129,7 @@ int main()
             {
                 continue;
             }
-            // parse packet
+            // parse packet3
             unique_ptr<ParsedPacket> parsed = packet.Parse();
             if (parsed)
             {
@@ -140,6 +165,7 @@ int main()
 //            cluster_mgr.DBSCAN_2steps(CLUSTER_KD_TREE, 0.05, 40, 0.30, 20, point_cloud, labels);
 //            cout << "af point size = " << point_cloud.points.size() << ", label size = " << labels.size() << endl;
           cout << point_cloud.points.size() << endl;
+/*
           for (i = 0; i < point_cloud.points.size(); ++i)
           {
                 cout << "<x,y,z> = " << point_cloud.points[i].x << " " <<
@@ -147,7 +173,7 @@ int main()
                                         point_cloud.points[i].z << endl;
           }
 
-
+*/
 
         }
     }
