@@ -29,7 +29,7 @@ bool API GetVersion(std::string& version, UDPSocket& socket);
  * @param socket UDP socket object
  * @return true if successfully retrieved device ID; otherwise, false
  */
-bool API GetDeviceID(int& id, UDPSocket& socket);
+bool API GetDeviceID(std::vector<unsigned char>& id, UDPSocket& socket);
 
 /**
  * @brief set device ID [under development]

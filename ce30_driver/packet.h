@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 #include <memory>
+#include <string.h>
 #include <unordered_map>
 #include "export.h"
 #include "data_types.h"
@@ -375,7 +376,7 @@ struct API GetIDResponsePacket : public PacketBase
      * @brief parse the packet for ID
      * @return the ID
      */
-    int32_t ID() const;
+    std::vector<unsigned char> ID() const;
 };
 
 /// @cond DO_NOT_DOCUMENT_THIS

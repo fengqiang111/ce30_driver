@@ -499,16 +499,14 @@ GetIDRequestPacket::GetIDRequestPacket() : RequestPacket()
 
 GetIDResponsePacket::GetIDResponsePacket()
 {
-    data.resize(4, 0);
-    int32_t default_id = -1;
-    memcpy(&data[0], &default_id, data.size());
+    data.resize(14, 0);
+    // int32_t default_id = -1;
+    // memcpy(&data[0], &default_id, data.size());
 }
 
-int32_t GetIDResponsePacket::ID() const
+std::vector<unsigned char> GetIDResponsePacket::ID() const
 {
-    int32_t id;
-    memcpy(&id, &data[0], data.size());
-    return id;
+    return data;
 }
 
 /// @cond DO_NOT_DOCUMENT_THIS

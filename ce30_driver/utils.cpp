@@ -42,8 +42,9 @@ bool GetVersion(std::string& version, UDPSocket& socket)
     return false;
 }
 
-bool GetDeviceID(int& id, UDPSocket& socket)
+bool GetDeviceID(std::vector<unsigned char>& id, UDPSocket& socket)
 {
+    id.clear();
     GetIDRequestPacket get_id_request;
     auto diagnose = socket.SendPacket(get_id_request);
     if (diagnose == Diagnose::send_successful)
